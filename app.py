@@ -36,7 +36,20 @@ footer{text-align:center;border-top:1px solid #29415c;padding:20px;color:#819bb6
 <main><div class="eyebrow">Digital footprint intelligence</div>
 <h1>Explore the <span>public web.</span></h1>
 <p>Search publicly indexed mentions of an email address or matching username. No OTP needed for public searches. This tool does not verify that a profile belongs to the email owner.</p>
-<section class="panel"><label for="email">Email address</label>
+<section class="panel"><h2>People Search</h2><p>Search publicly shared professional and social profiles by name or username. Matches are leads, not confirmed identities.</p>
+<label for="person">Full name or public username</label><input id="person" maxlength="100" placeholder="e.g. Example Developer or example_dev" autocomplete="off">
+<button id="peopleSearch">Find public profiles</button>
+<p class="caution" id="peopleMessage" role="status">Only public sources. Do not enter IDs, private addresses, or financial details.</p>
+<div id="peopleResults" class="hidden"><h3>Search public sources</h3><p id="peopleDetails" class="caution"></p>
+<div class="grid">
+<div class="tile"><a id="pGoogle" target="_blank" rel="noopener noreferrer">Web results ↗</a><p>Broad public references to the name or username.</p></div>
+<div class="tile"><a id="pLinkedin" target="_blank" rel="noopener noreferrer">Professional profiles ↗</a><p>Public LinkedIn pages indexed in search.</p></div>
+<div class="tile"><a id="pGithub" target="_blank" rel="noopener noreferrer">GitHub profiles ↗</a><p>Developer profiles and public contributions.</p></div>
+<div class="tile"><a id="pInstagram" target="_blank" rel="noopener noreferrer">Instagram public pages ↗</a><p>Indexed public profiles, which may be unrelated.</p></div>
+<div class="tile"><a id="pReddit" target="_blank" rel="noopener noreferrer">Reddit public posts ↗</a><p>Publicly indexed discussions and user references.</p></div>
+<div class="tile"><a id="pScholar" target="_blank" rel="noopener noreferrer">Google Scholar ↗</a><p>Published academic research, if any.</p></div>
+</div><p class="caution">Do not assume same-name or same-username profiles belong to one person. Confirm using the public profile's own links and statements. No background scraping or identity scoring.</p></div></section>
+<section class="panel"><h2>Email footprint search</h2><label for="email">Email address</label>
 <input type="email" id="email" placeholder="name@example.com" autocomplete="off">
 <button id="search">Explore public sources</button>
 <p class="caution" id="message" role="status">Do not enter passwords or confidential data. Email searches are opened directly on third-party sites.</p></section>
@@ -53,6 +66,21 @@ footer{text-align:center;border-top:1px solid #29415c;padding:20px;color:#819bb6
 </main><footer>© 2026 Panther OSINT · Public footprint self-audit</footer>
 <script>
 const el=id=>document.getElementById(id);
+el("peopleSearch").onclick=()=>{
+ const query=el("person").value.trim();
+ if(query.length<2 || query.length>100 || /[<>]/.test(query)){el("peopleMessage").textContent="Enter a public name or username (2–100 characters).";el("peopleResults").classList.add("hidden");return;}
+ const search=(s)=>"https://www.google.com/search?q="+encodeURIComponent(s);
+ el("pGoogle").href=search('"'+query+'"');
+ el("pLinkedin").href=search('"'+query+'" site:linkedin.com/in');
+ el("pGithub").href="https://github.com/search?q="+encodeURIComponent(query)+"&type=users";
+ el("pInstagram").href=search('"'+query+'" site:instagram.com');
+ el("pReddit").href=search('"'+query+'" site:reddit.com');
+ el("pScholar").href="https://scholar.google.com/scholar?q="+encodeURIComponent(query);
+ el("peopleDetails").textContent="Search term: "+query+" — open sources below to inspect public results.";
+ el("peopleMessage").textContent="Public source links prepared. No identities have been verified.";
+ el("peopleResults").classList.remove("hidden");
+};
+
 el("search").onclick=()=>{
  const email=el("email").value.trim().toLowerCase();
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254){
